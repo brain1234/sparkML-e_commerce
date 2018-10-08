@@ -1,0 +1,32 @@
+group 'AI_algorithms'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'scala'
+sourceSets.main.scala.srcDir "src/main/java"
+sourceSets.main.java.srcDirs = []
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven { url "http://maven.aliyun.com/nexus/content/groups/public"}
+    maven { url "http://mvnrepository.com"}
+}
+
+dependencies {
+    compile "org.apache.spark:spark-core_2.11:2.2.0"
+    compile "org.apache.spark:spark-sql_2.11:2.2.0"
+    compile "org.apache.spark:spark-mllib_2.11:2.2.0"
+//    compile "org.apache.spark:spark-ml_2.11:2.2.0"
+    compile "org.apache.spark:spark-hive_2.11:2.2.0"
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileScala.options.encoding = 'UTF-8'
+
+task copyToLib(type: Copy) {
+    into "$buildDir/libs/lib"
+    from configurations.runtime
+}
+
+jar { dependsOn copyToLib }
