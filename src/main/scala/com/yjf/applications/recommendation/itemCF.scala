@@ -1,7 +1,9 @@
 package com.yjf.applications.recommendation
 
+import org.apache.spark.ml.Model
 import org.apache.spark.ml.param.{IntParam, ParamMap, ParamValidators, Params}
 import org.apache.spark.ml.util.{DefaultParamsWritable, Identifiable}
+import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, Dataset}
 
 /**
@@ -58,9 +60,13 @@ class itemCF(override val uid: String) extends itemCFParams with DefaultParamsWr
 
 class itemCFModel private[applications] (
                                           override val uid: String,
-                                          val s: String) extends itemCFParams {
+                                          val s: String) extends Model[itemCFModel] with itemCFParams {
   override def copy(extra: ParamMap): itemCFModel = {
     val copied = new itemCFModel(uid, s)
     copyValues(copied, extra)
   }
+
+  override def transform(dataset: Dataset[_]): DataFrame = ???
+
+  override def transformSchema(schema: StructType): StructType = ???
 }

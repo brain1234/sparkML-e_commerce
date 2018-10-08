@@ -41,7 +41,7 @@ class test(override val uid: String) extends testParam with DefaultParamsWritabl
   /**@group fit*/
   /**如果输出是需要训练的模型，使用这个方法*/
   def fit(dataset: Dataset[_]): testModel = {
-
+    copyValues(new testModel(uid).setParent(this))
   }
 
   /**@group transform*/
@@ -72,11 +72,11 @@ object test extends DefaultParamsReadable[test]{
     val test: Dataset[Coltest]=rdd.map{line=>
       Coltest(line._1,line._2)
     }.toDS
-    val df = s.fit(test)
+    val df = s.transform(test)
     df.show(1)
   }
 }
 
 class testModel private[applications] (override val uid: String) {
-
+  
 }
