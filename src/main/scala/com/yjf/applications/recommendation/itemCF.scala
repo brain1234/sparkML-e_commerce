@@ -1,10 +1,8 @@
 package com.yjf.applications.recommendation
 
-import org.apache.spark.ml.Model
-import org.apache.spark.ml.param.{IntParam, ParamMap, ParamValidators, Params}
+import org.apache.spark.ml.param._
 import org.apache.spark.ml.util.{DefaultParamsWritable, Identifiable}
-import org.apache.spark.sql.types.StructType
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.DataFrame
 
 /**
   * @ClassName itemCF
@@ -15,9 +13,33 @@ import org.apache.spark.sql.{DataFrame, Dataset}
   */
 
 /**
+  * itemCFModel的参数
+  */
+private[recommendation] trait itemCFModelParams extends Params {
+
+  /**@group Params*/
+  val userColumn = new Param[String](this, "userColumn", "用户列名")
+
+  /**@group getParams*/
+  val getUserColumn: String = $(userColumn)
+
+  /**@group Params*/
+  val itemColumn = new Param[String](this, "itemColumn", "商品列名")
+
+  /**@group getParams*/
+  val getItemColumn: String = $(itemColumn)
+
+  /**@group Params*/
+  val ratingColumn = new Param[String](this, "ratingColumn", "得分列")
+
+  /**@group getParams*/
+  val getRatingColumn: String = $(ratingColumn)
+}
+
+/**
   * itemCF的参数
   */
-private[recommendation] trait itemCFParams extends Params {
+private[recommendation] trait itemCFParams extends itemCFModelParams with Params {
 
   /**@group Params*/
   val k = new IntParam(this, "k", "最近邻的个数", ParamValidators.gtEq(1))
@@ -34,11 +56,14 @@ private[recommendation] trait itemCFParams extends Params {
   /**set default params*/
   setDefault(
     k -> 5,
-    n -> 3
+    n -> 3,
+    userColumn -> "user",
+    itemColumn -> "item",
+    ratingColumn -> "rating"
   )
 }
 
-class itemCF(override val uid: String) extends itemCFParams with DefaultParamsWritable{
+class itemCF(override val uid: String, similarity: String) extends itemCFParams with DefaultParamsWritable{
 
   override def copy(extra: ParamMap): itemCF = defaultCopy(extra)
 
@@ -52,21 +77,16 @@ class itemCF(override val uid: String) extends itemCFParams with DefaultParamsWr
 
   /**@group fit*/
   def fit(dataSet: DataFrame): itemCFModel = {
-
+    val itemFactors = dataSet
+    copyValues(new itemCFModel(uid, itemFactors))
   }
-
-
 }
 
 class itemCFModel private[applications] (
                                           override val uid: String,
-                                          val s: String) extends Model[itemCFModel] with itemCFParams {
+                                          @transient itemFactors: DataFrame) extends itemCFParams {
   override def copy(extra: ParamMap): itemCFModel = {
-    val copied = new itemCFModel(uid, s)
+    val copied = new itemCFModel(uid, itemFactors)
     copyValues(copied, extra)
   }
-
-  override def transform(dataset: Dataset[_]): DataFrame = ???
-
-  override def transformSchema(schema: StructType): StructType = ???
 }

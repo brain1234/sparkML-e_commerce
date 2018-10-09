@@ -1,8 +1,5 @@
 package com.yjf.applications.example
 
-import org.apache.spark.ml.classification.GBTClassifier
-import org.apache.spark.ml.clustering.KMeans
-import org.apache.spark.ml.feature.{MinMaxScaler, PCA, Tokenizer, Word2Vec}
 import org.apache.spark.ml.param.{IntParam, ParamMap, ParamValidators, Params}
 import org.apache.spark.ml.recommendation.ALS
 import org.apache.spark.ml.regression.LinearRegression
@@ -41,7 +38,7 @@ class test(override val uid: String) extends testParam with DefaultParamsWritabl
   /**@group fit*/
   /**如果输出是需要训练的模型，使用这个方法*/
   def fit(dataset: Dataset[_]): testModel = {
-    copyValues(new testModel(uid).setParent(this))
+    copyValues(new testModel(uid))
   }
 
   /**@group transform*/
@@ -61,9 +58,6 @@ object test extends DefaultParamsReadable[test]{
   override def load(path: String): test = super.load(path)
 
   def main(args: Array[String]): Unit = {
-    val lir = new LinearRegression()
-    val scaler = new MinMaxScaler()
-    val als = new ALS()
     val s = new test().setK(1)
     val r = Seq(("a",1),("b",2),("c",3))
     val spark = SparkSession.builder().master("local").getOrCreate()
@@ -77,6 +71,10 @@ object test extends DefaultParamsReadable[test]{
   }
 }
 
-class testModel private[applications] (override val uid: String) {
-  
+class testModel private[applications] (override val uid: String) extends testParam {
+
+  override def copy(extra: ParamMap): testModel = {
+    copyValues(new testModel(uid))
+  }
+
 }
