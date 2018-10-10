@@ -59,6 +59,7 @@ object test extends DefaultParamsReadable[test]{
 
   def main(args: Array[String]): Unit = {
     val s = new test().setK(1)
+    val ss = new ALS()
     val r = Seq(("a",1),("b",2),("c",3))
     val spark = SparkSession.builder().master("local").getOrCreate()
     import spark.implicits._
